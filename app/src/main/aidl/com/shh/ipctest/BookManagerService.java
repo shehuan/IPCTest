@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
@@ -50,35 +51,31 @@ public class BookManagerService extends Service {
             Log.e(TAG, "unregister success");
         }
 
-//        /**
-//         * 客户端调用服务端方法时校验
-//         */
-//        @Override
-//        public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
-//            if (!passBindCheck()) {
-//                Log.e(TAG, "bind denied");
-//                return false;
-//            }
-//
-//            return super.onTransact(code, data, reply, flags);
-//        }
+        /**
+         * 客户端调用服务端方法时校验，客户端和服务端是否是同一个应用都可以验证
+         */
+        @Override
+        public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+            if (!passBindCheck()) {
+                Log.e(TAG, "bind denied");
+                return false;
+            }
+
+            return super.onTransact(code, data, reply, flags);
+        }
     };
 
     public BookManagerService() {
     }
 
-    /**
-     * 客户端绑定服务端时校验
-     *
-     * @param intent
-     * @return
-     */
     @Override
     public IBinder onBind(Intent intent) {
-        if (!passBindCheck()) {
-            Log.e(TAG, "bind denied");
-            return null;
-        }
+        // 客户端绑定服务端时校验
+        // 如果客户端和服务端是两个应用，则无法在onBind中完成校验，需要在onTransact中完成
+//        if (!passBindCheck()) {
+//            Log.e(TAG, "bind denied");
+//            return null;
+//        }
 
         return mBinder;
     }

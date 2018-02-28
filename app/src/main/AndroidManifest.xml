@@ -23,9 +23,24 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".AIDLActivity" />
+        <activity android:name=".MessengerActivity" />
+
         <service
             android:name=".BookManagerService"
-            android:process=":remote" />
+            android:process=":aidl_remote">
+            <intent-filter>
+                <action android:name="android.intent.action.BookManagerService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".MessengerService"
+            android:process=":messenger_remote">
+            <intent-filter>
+                <action android:name="android.intent.action.MessengerService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

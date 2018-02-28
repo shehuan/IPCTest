@@ -62,6 +62,6 @@ public class Book implements Parcelable {
 
     @Override
     public String toString() {
-        return String.format("[bookId:%s, bookName:%s]", id, name);
+        return String.format("《%s》", name);
     }
 }

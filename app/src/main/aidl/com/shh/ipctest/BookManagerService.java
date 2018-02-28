@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
@@ -13,6 +12,8 @@ import android.util.Log;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static android.os.Binder.getCallingUid;
 
 public class BookManagerService extends Service {
 
@@ -49,29 +50,58 @@ public class BookManagerService extends Service {
             Log.e(TAG, "unregister success");
         }
 
-
-        @Override
-        public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
-            int check = checkCallingOrSelfPermission("com.shh.ipctest.permission.ACCESS_BOOK_SERVICE");
-            if (check == PackageManager.PERMISSION_DENIED) {
-                return false;
-            }
-
-            String[] packages = getPackageManager().getPackagesForUid(getCallingUid());
-            if (packages != null && packages.length > 0 && !packages[0].startsWith("com.shh")) {
-                return false;
-            }
-
-            return super.onTransact(code, data, reply, flags);
-        }
+//        /**
+//         * 客户端调用服务端方法时校验
+//         */
+//        @Override
+//        public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+//            if (!passBindCheck()) {
+//                Log.e(TAG, "bind denied");
+//                return false;
+//            }
+//
+//            return super.onTransact(code, data, reply, flags);
+//        }
     };
 
     public BookManagerService() {
     }
 
+    /**
+     * 客户端绑定服务端时校验
+     *
+     * @param intent
+     * @return
+     */
     @Override
     public IBinder onBind(Intent intent) {
+        if (!passBindCheck()) {
+            Log.e(TAG, "bind denied");
+            return null;
+        }
+
         return mBinder;
+    }
+
+    /**
+     * 进行客户端的连接校验
+     *
+     * @return
+     */
+    private boolean passBindCheck() {
+        // 客户端是否已申请了指定权限
+        int check = checkCallingOrSelfPermission("com.shh.ipctest.permission.ACCESS_BOOK_SERVICE");
+        if (check == PackageManager.PERMISSION_DENIED) {
+            return false;
+        }
+
+        // 检验客户端包名
+        String[] packages = getPackageManager().getPackagesForUid(getCallingUid());
+        if (packages != null && packages.length > 0 && !packages[0].startsWith("com.shh")) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override

@@ -3,10 +3,10 @@
     package="com.shh.ipctest">
 
     <permission
-        android:name="com.shh.ipctest.permission.ACCESS_BOOK_SERVICE"
+        android:name="com.shh.ipctest.permission.ACCESS_LIBRARY_SERVICE"
         android:protectionLevel="normal" />
 
-    <uses-permission android:name="com.shh.ipctest.permission.ACCESS_BOOK_SERVICE" />
+    <uses-permission android:name="com.shh.ipctest.permission.ACCESS_LIBRARY_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -27,10 +27,10 @@
         <activity android:name=".MessengerActivity" />
 
         <service
-            android:name=".BookManagerService"
+            android:name=".LibraryManagerService"
             android:process=":aidl_remote">
             <intent-filter>
-                <action android:name="android.intent.action.BookManagerService" />
+                <action android:name="android.intent.action.LibraryManagerService" />
             </intent-filter>
         </service>
 

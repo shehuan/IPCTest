@@ -5,20 +5,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Book implements Parcelable {
-    private int id;
     private String name;
 
-    public Book(int id, String name) {
-        this.id = id;
+    public Book(String name) {
         this.name = name;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -36,7 +26,6 @@ public class Book implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.id);
         dest.writeString(this.name);
     }
 
@@ -44,7 +33,6 @@ public class Book implements Parcelable {
     }
 
     protected Book(Parcel in) {
-        this.id = in.readInt();
         this.name = in.readString();
     }
 

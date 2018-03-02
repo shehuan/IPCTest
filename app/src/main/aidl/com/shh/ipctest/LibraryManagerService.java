@@ -16,9 +16,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.os.Binder.getCallingUid;
 
-public class BookManagerService extends Service {
+public class LibraryManagerService extends Service {
 
-    private static final String TAG = "BookManagerService";
+    private static final String TAG = "LibraryManagerService";
 
     // CopyOnWriteArrayList 支持并发读写
     private CopyOnWriteArrayList<Book> mBookList = new CopyOnWriteArrayList<>();
@@ -27,15 +27,15 @@ public class BookManagerService extends Service {
     // AtomicBoolean 支持并发读写
     private AtomicBoolean mIsServiceDestroy = new AtomicBoolean(false);
 
-    private Binder mBinder = new IBookManager.Stub() {
+    private Binder mBinder = new ILibraryManager.Stub() {
 
         @Override
-        public List<Book> getBookList() throws RemoteException {
+        public List<Book> getNewBookList() throws RemoteException {
             return mBookList;
         }
 
         @Override
-        public void addBook(Book book) throws RemoteException {
+        public void donateBook(Book book) throws RemoteException {
             mBookList.add(book);
         }
 
@@ -65,7 +65,7 @@ public class BookManagerService extends Service {
         }
     };
 
-    public BookManagerService() {
+    public LibraryManagerService() {
     }
 
     @Override
@@ -87,7 +87,7 @@ public class BookManagerService extends Service {
      */
     private boolean passBindCheck() {
         // 客户端是否已申请了指定权限
-        int check = checkCallingOrSelfPermission("com.shh.ipctest.permission.ACCESS_BOOK_SERVICE");
+        int check = checkCallingOrSelfPermission("com.shh.ipctest.permission.ACCESS_LIBRARY_SERVICE");
         if (check == PackageManager.PERMISSION_DENIED) {
             return false;
         }
@@ -104,8 +104,8 @@ public class BookManagerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mBookList.add(new Book(0, "book0"));
-        mBookList.add(new Book(1, "book1"));
+        mBookList.add(new Book("book0"));
+        mBookList.add(new Book("book1"));
 
         new Thread(new Runnable() {
             @Override
@@ -117,7 +117,7 @@ public class BookManagerService extends Service {
                         e.printStackTrace();
                     }
 
-                    Book book = new Book(mBookList.size(), "book" + mBookList.size());
+                    Book book = new Book("book" + mBookList.size());
                     mBookList.add(book);
                     bookArrivedNotify(book);
                 }

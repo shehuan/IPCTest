@@ -19,7 +19,7 @@ public class AIDLActivity extends AppCompatActivity {
 
     private static final int MESSAGE_NEW_BOOK_ARRIVED = 1;
 
-    private IBookManager mBookManager;
+    private ILibraryManager mBookManager;
 
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
@@ -57,7 +57,7 @@ public class AIDLActivity extends AppCompatActivity {
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            IBookManager bookManager = IBookManager.Stub.asInterface(service);
+            ILibraryManager bookManager = ILibraryManager.Stub.asInterface(service);
             mBookManager = bookManager;
             try {
                 mBookManager.asBinder().linkToDeath(mDeathRecipient, 0);
@@ -66,10 +66,10 @@ public class AIDLActivity extends AppCompatActivity {
             }
 
             try {
-                List<Book> books = bookManager.getBookList();
+                List<Book> books = bookManager.getNewBookList();
                 Log.e(TAG, "books:" + books.toString());
-                bookManager.addBook(new Book(books.size(), "book" + books.size()));
-                List<Book> books2 = bookManager.getBookList();
+                bookManager.donateBook(new Book("book" + books.size()));
+                List<Book> books2 = bookManager.getNewBookList();
                 Log.e(TAG, "books:" + books2.toString());
 
                 // 注册通知
@@ -95,12 +95,12 @@ public class AIDLActivity extends AppCompatActivity {
     }
 
     private void bindNewService() {
-        Intent intent = new Intent(AIDLActivity.this, BookManagerService.class);
+        Intent intent = new Intent(AIDLActivity.this, LibraryManagerService.class);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
         // 如果客户端是另一个应用，需要隐式绑定服务
 //        Intent intent = new Intent();
-//        intent.setAction("android.intent.action.BookManagerService");
+//        intent.setAction("android.intent.action.LibraryManagerService");
 //        intent.setPackage("com.shh.ipctest");
 //        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }

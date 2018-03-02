@@ -8,7 +8,7 @@ interface ILibraryManager{
     //in 代表参数为输入类型的
     void donateBook(in Book book);
 
-    void registerListener(IOnNewBookArrivedListener listener);
+    void register(IOnNewBookArrivedListener listener);
 
-    void unregisterListener(IOnNewBookArrivedListener listener);
+    void unregister(IOnNewBookArrivedListener listener);
 }

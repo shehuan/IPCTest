@@ -22,7 +22,7 @@ public class LibraryManagerService extends Service {
 
     // CopyOnWriteArrayList 支持并发读写
     private CopyOnWriteArrayList<Book> mBookList = new CopyOnWriteArrayList<>();
-    // 系统提供的专门用于删除跨进程 listener 的接口
+    // 系统提供的专门用于删除跨进程 listener 的类
     private RemoteCallbackList<IOnNewBookArrivedListener> mListenerList = new RemoteCallbackList<>();
     // AtomicBoolean 支持并发读写
     private AtomicBoolean mIsServiceDestroy = new AtomicBoolean(false);
@@ -40,13 +40,13 @@ public class LibraryManagerService extends Service {
         }
 
         @Override
-        public void registerListener(IOnNewBookArrivedListener listener) throws RemoteException {
+        public void register(IOnNewBookArrivedListener listener) throws RemoteException {
             mListenerList.register(listener);
             Log.e(TAG, "register success");
         }
 
         @Override
-        public void unregisterListener(IOnNewBookArrivedListener listener) throws RemoteException {
+        public void unregister(IOnNewBookArrivedListener listener) throws RemoteException {
             mListenerList.unregister(listener);
             Log.e(TAG, "unregister success");
         }
@@ -106,13 +106,14 @@ public class LibraryManagerService extends Service {
         super.onCreate();
         mBookList.add(new Book("book0"));
         mBookList.add(new Book("book1"));
-
+        // 在子线程中每隔3秒创建一本新书，并通知所有已注册的客户端
         new Thread(new Runnable() {
             @Override
             public void run() {
+                // 如果服务还没终止
                 while (!mIsServiceDestroy.get()) {
                     try {
-                        Thread.sleep(5 * 1000);
+                        Thread.sleep(3 * 1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

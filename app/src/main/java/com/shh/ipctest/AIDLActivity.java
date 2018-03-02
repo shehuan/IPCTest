@@ -19,7 +19,7 @@ public class AIDLActivity extends AppCompatActivity {
 
     private static final int MESSAGE_NEW_BOOK_ARRIVED = 1;
 
-    private ILibraryManager mBookManager;
+    private ILibraryManager mLibraryManager;
 
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
@@ -37,6 +37,7 @@ public class AIDLActivity extends AppCompatActivity {
 
         @Override
         public void onNewBookArrived(Book book) throws RemoteException {
+            // 由于 onNewBookArrived 方法在子线程被调用，所以通过Handler切换到UI线程，方便UI操作
             mHandler.obtainMessage(MESSAGE_NEW_BOOK_ARRIVED, book).sendToTarget();
         }
     };
@@ -45,9 +46,9 @@ public class AIDLActivity extends AppCompatActivity {
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
         public void binderDied() {
-            if (mBookManager != null) {
-                mBookManager.asBinder().unlinkToDeath(mDeathRecipient, 0);
-                mBookManager = null;
+            if (mLibraryManager != null) {
+                mLibraryManager.asBinder().unlinkToDeath(mDeathRecipient, 0);
+                mLibraryManager = null;
 
                 bindNewService();
             }
@@ -57,23 +58,23 @@ public class AIDLActivity extends AppCompatActivity {
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            ILibraryManager bookManager = ILibraryManager.Stub.asInterface(service);
-            mBookManager = bookManager;
+            ILibraryManager libraryManager = ILibraryManager.Stub.asInterface(service);
+            mLibraryManager = libraryManager;
             try {
-                mBookManager.asBinder().linkToDeath(mDeathRecipient, 0);
+                mLibraryManager.asBinder().linkToDeath(mDeathRecipient, 0);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
 
             try {
-                List<Book> books = bookManager.getNewBookList();
+                List<Book> books = libraryManager.getNewBookList();
                 Log.e(TAG, "books:" + books.toString());
-                bookManager.donateBook(new Book("book" + books.size()));
-                List<Book> books2 = bookManager.getNewBookList();
+                libraryManager.donateBook(new Book("book" + books.size()));
+                List<Book> books2 = libraryManager.getNewBookList();
                 Log.e(TAG, "books:" + books2.toString());
 
                 // 注册通知
-                bookManager.registerListener(listener);
+                libraryManager.register(listener);
 
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -109,10 +110,10 @@ public class AIDLActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         unbindService(mServiceConnection);
-        if (mBookManager != null && mBookManager.asBinder().isBinderAlive()) {
+        if (mLibraryManager != null && mLibraryManager.asBinder().isBinderAlive()) {
             try {
                 // 取消注册
-                mBookManager.unregisterListener(listener);
+                mLibraryManager.unregister(listener);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }

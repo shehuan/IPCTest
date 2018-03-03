@@ -12,7 +12,7 @@ import android.util.Log;
 
 public class MessengerService extends Service {
     private static final String TAG = "MessengerService";
-
+    // 将Messenger和Handler关联起来
     private Messenger mServiceMessenger = new Messenger(new MessengerHandler());
 
     public MessengerService() {
@@ -29,8 +29,9 @@ public class MessengerService extends Service {
             super.handleMessage(msg);
             switch (msg.what) {
                 case MessengerActivity.MESSAGE_FROM_CLIENT:
+                    // 打印接收到的客户端消息
                     Log.e(TAG, "receive message from client:" + msg.getData().getString("msg"));
-
+                    // 给客户端回复一条消息
                     Messenger clientMessenger = msg.replyTo;
                     Message message = Message.obtain();
                     message.what = MessengerActivity.MESSAGE_FROM_SERVICE;

@@ -35,6 +35,7 @@ public class MessengerActivity extends AppCompatActivity {
             // 传递服务端回复客户端时需要使用的Messenger
             message.replyTo = mClientMessenger;
             try {
+                // 发送消息
                 mServiceMessenger.send(message);
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -68,6 +69,7 @@ public class MessengerActivity extends AppCompatActivity {
             super.handleMessage(msg);
             switch (msg.what) {
                 case MessengerActivity.MESSAGE_FROM_SERVICE:
+                    // 打印服务端回复的消息
                     Log.e(TAG, "receive message from service:" + msg.getData().getString("msg"));
                     break;
             }

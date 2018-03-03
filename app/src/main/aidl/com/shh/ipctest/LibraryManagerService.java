@@ -56,8 +56,8 @@ public class LibraryManagerService extends Service {
          */
         @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
-            if (!passBindCheck()) {
-                Log.e(TAG, "bind denied");
+            if (!permissionCheck()) {
+                Log.e(TAG, "transact denied");
                 return false;
             }
 
@@ -72,7 +72,7 @@ public class LibraryManagerService extends Service {
     public IBinder onBind(Intent intent) {
         // 客户端绑定服务端时校验
         // 如果客户端和服务端是两个应用，则无法在onBind中完成校验，需要在onTransact中完成
-//        if (!passBindCheck()) {
+//        if (!permissionCheck()) {
 //            Log.e(TAG, "bind denied");
 //            return null;
 //        }
@@ -85,7 +85,7 @@ public class LibraryManagerService extends Service {
      *
      * @return
      */
-    private boolean passBindCheck() {
+    private boolean permissionCheck() {
         // 客户端是否已申请了指定权限
         int check = checkCallingOrSelfPermission("com.shh.ipctest.permission.ACCESS_LIBRARY_SERVICE");
         if (check == PackageManager.PERMISSION_DENIED) {
